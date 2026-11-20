@@ -1,7 +1,5 @@
 # overstats · 社区维护版（v2.7.7）
 
-> **关于判定书内容口径**：上游 `4ba5957e`（2026-11-13）把是区吗的提示词改成「只喂 0-100 同英雄参考指数、禁止出现原始数值」，生成内容随之变成各种指数。配套后端仓库 `imztm123/Overstats` 已把 `src/modules/dashen_shiqu/`（`service.py` / `stat_db.py` / `render.py` / `__init__.py`）回退到该提交之前的版本，判定书回到「伤害 / 治疗 / 命中率等精确局内数字」的原版口径。`json_mode` 字段仍保留在生成的 `shiqu_config.py` 里：旧版代码不读它，日后若跟进上游新版则自动生效。
-
 > ## ⚠️ 声明
 >
 > **本项目是基于原版 [`astrbot_plugin_overstats`](https://github.com/Zzzzzzouhang/astrbot_plugin_overstats) 二次修改的版本**：在原版基础上，针对不断更新的 AstrBot 做适配性更新与优化（`@` 渲染变更、消息链兼容、插件市场接入等），并非原创项目。
@@ -115,6 +113,9 @@ chain = []
 - `metadata.yaml`：`version` → `v2.7.7`，`author` → `Zzzzzzouhang, ZTM`，`repo` → 本仓库；`logo.png` 换为自制图标（1:1，256×256）。
 - `_conf_schema.json` 的 `backend_repo_url` 默认值、`deploy/ops/manager.py` 的兜底地址，全部指向本仓库，避免插件更新时拉回原版覆盖改动。
 - `deploy/ops/config_writer.py`、`deploy/ops/manager.py` 增加 `[Shiqu诊断]` 日志（仅打印布尔值），便于排查是区吗 LLM 配置是否下发成功。
+
+> **关于判定书内容口径**：上游 `4ba5957e`（2026-11-13）把是区吗的提示词改成「只喂 0-100 同英雄参考指数、禁止出现原始数值」，生成内容随之变成各种指数。配套后端仓库 `imztm123/Overstats` 已把 `src/modules/dashen_shiqu/`（`service.py` / `stat_db.py` / `render.py` / `__init__.py`）回退到该提交之前的版本，判定书回到「伤害 / 治疗 / 命中率等精确局内数字」的原版口径。`json_mode` 字段仍保留在生成的 `shiqu_config.py` 里：旧版代码不读它，日后若跟进上游新版则自动生效。
+
 - ID 解析失败文案统一为「未查询到id或者id错误，id严格区分大小写（受大神接口维护影响，部分id不可用）」。
 - 新增 `scripts/fix_shiqu_config.py`；两个仓库均补 `.gitattributes`（`* text=auto eol=lf`），避免 Windows 提交给 Linux 部署带来 CRLF 污染。
 
