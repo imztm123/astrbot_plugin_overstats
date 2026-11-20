@@ -14,6 +14,9 @@
 - **诊断日志**：`config_writer.py` 与 `deploy/ops/manager.py` 增加 `[Shiqu诊断]` 输出，打印 `shiqu_llm_api_base` / `api_key` / `model` 是否已配置（仅布尔值）。
 - **ID 解析失败文案**：统一为「未查询到id或者id错误，id严格区分大小写（受大神接口维护影响，部分id不可用）」。
 
+### 🔧 优化
+- **是区吗判定书恢复原始数值口径**：上游 `4ba5957e`（2026-11-13）将提示词改为「仅提供 0-100 同英雄参考指数、禁止输出具体数字」，判定书因此变成各种指数。配套后端仓库 `imztm123/Overstats` 已将 `src/modules/dashen_shiqu/` 四个文件回退至该提交之前（`02fa2a5d`），判定书重新输出伤害/治疗/命中率等精确局内数字，与旧版观感一致。开庭（`dashen_court`）复用的 `stat_db` / `render` 符号签名已逐一比对，无破坏性变更。
+
 ### 🔒 仓库整理
 - **后端仓库地址自动迁移（与原版同包名的升级场景）**：`main.py` 新增 `_migrate_backend_repo_url()`，插件初始化时若发现 `backend_repo_url` 仍指向原版后端（`Zzzzzzouhang/Overstats`、`AddOneSecondL/Overstats`），自动切换为本仓库配套后端并写回配置（用户手动填的其它地址不受影响）。
 - **克隆 origin 自动对齐**：`DeployManager._align_remote()` 在 `/ow部署`、`/ow更新后端` 前比对现有后端目录的 `origin` 与配置中的 `backend_repo_url`，不一致时先 `git remote set-url`，避免"配置已改但仍从原仓库拉取"。
