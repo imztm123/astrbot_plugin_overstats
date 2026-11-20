@@ -17,6 +17,9 @@
 ### 🔧 优化
 - **是区吗判定书恢复原始数值口径**：上游 `4ba5957e`（2026-11-13）将提示词改为「仅提供 0-100 同英雄参考指数、禁止输出具体数字」，判定书因此变成各种指数。配套后端仓库 `imztm123/Overstats` 已将 `src/modules/dashen_shiqu/` 四个文件回退至该提交之前（`02fa2a5d`），判定书重新输出伤害/治疗/命中率等精确局内数字，与旧版观感一致。开庭（`dashen_court`）复用的 `stat_db` / `render` 符号签名已逐一比对，无破坏性变更。
 
+### 🔍 诊断增强
+- `/ow部署状态` 与监控面板的部署信息新增 **后端仓库地址（origin）**：当已有克隆的 origin 与配置的 `backend_repo_url` 不一致时，直接标注「⚠️ 与配置不一致，建议执行 /ow更新后端 自动切换」，并列出期望仓库。避免出现「代码看着对、实际拉的是原版后端」这类隐蔽问题。
+
 ### 🔒 仓库整理
 - **后端仓库地址自动迁移（与原版同包名的升级场景）**：`main.py` 新增 `_migrate_backend_repo_url()`，插件初始化时若发现 `backend_repo_url` 仍指向原版后端（`Zzzzzzouhang/Overstats`、`AddOneSecondL/Overstats`），自动切换为本仓库配套后端并写回配置（用户手动填的其它地址不受影响）。
 - **克隆 origin 自动对齐**：`DeployManager._align_remote()` 在 `/ow部署`、`/ow更新后端` 前比对现有后端目录的 `origin` 与配置中的 `backend_repo_url`，不一致时先 `git remote set-url`，避免"配置已改但仍从原仓库拉取"。

@@ -47,6 +47,8 @@ class DeployStatus:
     backend_port: int = 18081
     backend_host: str = "127.0.0.1"
     git_commit: str = "unknown"
+    git_origin: str = ""
+    repo_expected: str = ""
     process_alive: bool = False
     process_pid: Optional[int] = None
     last_deploy_time: float = 0.0
@@ -192,12 +194,17 @@ class DeployManager:
         """获取当前部署状态快照。"""
         # 尝试获取最新 commit hash
         commit = self._git_commit
+        origin = ""
         if self._backend_dir.exists() and (self._backend_dir / ".git").exists():
             try:
                 commit = await git_ops.get_commit_hash(self._backend_dir)
                 self._git_commit = commit
             except Exception:
                 pass
+            try:
+                origin = await git_ops.get_remote_url(self._backend_dir)
+            except Exception:
+                origin = ""
 
         return DeployStatus(
             state=self._state,
@@ -207,6 +214,8 @@ class DeployManager:
             backend_port=self.backend_port,
             backend_host=self.backend_host,
             git_commit=commit,
+            git_origin=origin,
+            repo_expected=self.repo_url,
             process_alive=self._runner.is_alive,
             process_pid=self._runner._process.pid if (self._runner._process and self._runner._process.returncode is None) else None,
             last_deploy_time=self._last_deploy_time,

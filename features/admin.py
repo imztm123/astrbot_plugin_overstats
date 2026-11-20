@@ -9,6 +9,14 @@ import aiohttp
 logger = logging.getLogger("astrbot")
 
 
+def _norm_repo(url: str) -> str:
+    """仓库地址归一化：忽略尾部斜杠、.git 后缀与大小写，仅用于比较。"""
+    u = str(url or "").strip().rstrip("/")
+    if u.endswith(".git"):
+        u = u[:-4]
+    return u.lower()
+
+
 async def maintenance_cmd(plugin, event: AstrMessageEvent, action: str = ''):
     """设置或取消维护模式（仅 AstrBot 管理员可用）
         用法：/维护 内容 或 /维护 取消
@@ -118,6 +126,12 @@ async def ow_deploy_status_cmd(plugin, event: AstrMessageEvent):
         lines.append(f"📂 后端目录: {status.backend_dir or '未部署'}")
         lines.append(f"🐍 虚拟环境: {('已创建' if status.venv_dir else '未创建')}")
         lines.append(f'🌿 Git 版本: {status.git_commit}')
+        if status.git_origin:
+            same = _norm_repo(status.git_origin) == _norm_repo(status.repo_expected)
+            flag = '' if same else '  ⚠️ 与配置不一致，建议执行 /ow更新后端 自动切换'
+            lines.append(f'🌐 后端仓库: {status.git_origin}{flag}')
+            if not same and status.repo_expected:
+                lines.append(f'   期望仓库: {status.repo_expected}')
         lines.append(f"⚙️ 进程状态: {('运行中 (PID=' + str(status.process_pid) + ')' if status.process_alive else '未运行')}")
         if status.last_deploy_time:
             deploy_time = datetime.fromtimestamp(status.last_deploy_time).strftime('%Y-%m-%d %H:%M:%S')

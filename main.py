@@ -2094,7 +2094,7 @@ class OverstatsPlugin(Star):
             status = dm.status()
         except Exception:
             status = None
-        data['deploy'] = {'mode': dm.mode, 'state': status.state if status else 'unknown', 'process_alive': status.process_alive if status else False, 'backend_port': status.backend_port if status else 0, 'pid': status.process_pid if status else None, 'git_commit': status.git_commit if status else 'unknown', 'last_deploy_time': status.last_deploy_time if status else 0, 'last_error': status.last_error if status else ''} if status else {'mode': dm.mode, 'state': 'unknown'}
+        data['deploy'] = {'mode': dm.mode, 'state': status.state if status else 'unknown', 'process_alive': status.process_alive if status else False, 'backend_port': status.backend_port if status else 0, 'pid': status.process_pid if status else None, 'git_commit': status.git_commit if status else 'unknown', 'git_origin': status.git_origin if status else '', 'repo_expected': status.repo_expected if status else '', 'last_deploy_time': status.last_deploy_time if status else 0, 'last_error': status.last_error if status else ''} if status else {'mode': dm.mode, 'state': 'unknown'}
         rl_stats = await self.monitor.get_rate_limit_stats()
         data['rate_limit'] = rl_stats
         data['rate_limit_config'] = {'cmd_enabled': getattr(self, '_rate_limit_enabled', False), 'cmd_per_user_max': getattr(self, '_rate_limit_per_user', 3)}
@@ -2151,7 +2151,7 @@ class OverstatsPlugin(Star):
             status = dm.status()
         except Exception:
             return json_response({'error': '获取部署状态失败'})
-        return json_response({'mode': dm.mode, 'state': status.state, 'backend_dir': str(status.backend_dir) if status.backend_dir else '', 'backend_port': status.backend_port, 'backend_host': status.backend_host, 'git_commit': status.git_commit, 'process_alive': status.process_alive, 'process_pid': status.process_pid, 'last_deploy_time': status.last_deploy_time, 'last_error': status.last_error})
+        return json_response({'mode': dm.mode, 'state': status.state, 'backend_dir': str(status.backend_dir) if status.backend_dir else '', 'backend_port': status.backend_port, 'backend_host': status.backend_host, 'git_commit': status.git_commit, 'git_origin': status.git_origin, 'repo_expected': status.repo_expected, 'process_alive': status.process_alive, 'process_pid': status.process_pid, 'last_deploy_time': status.last_deploy_time, 'last_error': status.last_error})
 
     async def _api_monitor_errors_stream(self):
         if not self.monitor_sse:
