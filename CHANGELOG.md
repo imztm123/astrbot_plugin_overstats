@@ -1,11 +1,5 @@
 # Changelog
 
-## v2.7.7（ZTM 自用改版）
-
-- 仅版本号递增，用于在插件市场以「版本更新」方式提交，与 v2.7.6 代码完全一致。
-- `metadata.yaml` 的 `name` 保持 `astrbot_plugin_overstats`：市场身份为 `owner/name`，本次为 `imztm123/astrbot_plugin_overstats`，与其他作者不冲突；`display_name` 为「overstats（ZTM 优化版）」用于市场列表区分。
-
-
 ## v2.7.6（ZTM 自用改版）
 
 > 基于上游 v2.7.5 修改。上游另有同名 v2.7.6，两者互不兼容，请以仓库地址区分。
