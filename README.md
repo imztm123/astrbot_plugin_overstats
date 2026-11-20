@@ -188,10 +188,11 @@ git clone https://github.com/imztm123/astrbot_plugin_overstats.git
 
 AstrBot 按 `metadata.name` 管理插件目录、配置面板和更新源，因此「同名即同一插件」：装本版会**替换**原版（反之亦然），并且**配置面板沿用旧插件的值**——这正是升级后 `backend_repo_url` 还写着原作者后端的原因（`_conf_schema.json` 的默认值只在首次生成配置时生效）。
 
-本版对此做了两处自动纠正：
+本版对此做了三处自动纠正（装的是本仓库版本时，以下全部自动完成）：
 
 1. **配置迁移**：插件初始化时 `_migrate_backend_repo_url()` 若发现 `backend_repo_url` 仍指向原版后端（`Zzzzzzouhang/Overstats`、`AddOneSecondL/Overstats`），自动切换为本仓库配套后端并写回配置，日志会打印 `[Overstats] 检测到 backend_repo_url 仍指向原版后端…`。手动填写的其它地址不受影响。
 2. **origin 对齐**：`/ow部署`、`/ow更新后端` 会先比对现有后端目录的 `origin` 与配置值，不一致时自动 `git remote set-url`，避免"配置改了却还在拉原仓库"。
+3. **加载/重启即对齐**：插件初始化与 `/ow重启后端` 都会执行 `ensure_repo_alignment()`，发现磁盘克隆目录的 `origin` 与配置不一致就立即 `git remote set-url` 纠正，并提示「建议执行一次 /ow更新后端」——这样即使老用户不主动部署，也不会再把更新打到原仓库。
 
 想得到与仓库完全一致的后端目录，切换后执行一次 `/ow卸载后端执行仅代码` → `/ow部署`（**会删除后端数据库**，先备份 `match_stats.sqlite3` 等文件）。
 

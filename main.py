@@ -159,6 +159,13 @@ class OverstatsPlugin(Star):
         self.deploy_manager = DeployManager(plugin_data_dir=self.plugin_data_dir, config=config, context=context)
         self.base_url = self.deploy_manager.resolve_base_url()
         logger.info(f'[Overstats] 接入模式: {self.deploy_manager.mode}, base_url={self.base_url}')
+        # 插件加载即对齐后端 origin：从原版覆盖升级过来的实例，磁盘克隆目录可能仍指向原仓库，
+        # 若此时直接 /ow更新后端 会拉回原作者代码。这里只改 remote，不拉代码。
+        try:
+            self._repo_align_task = asyncio.create_task(self.deploy_manager.ensure_repo_alignment())
+        except Exception as e:
+            logger.warning(f'[Overstats] 启动时对齐后端 origin 失败: {e}')
+            self._repo_align_task = None
         self.daily_prompt_state_file = self.plugin_data_dir / 'daily_group_prompt_state.json'
         self.daily_prompt_state = self._load_daily_prompt_state()
         self.daily_prompt_reset_task = asyncio.create_task(self._daily_prompt_reset_loop())
