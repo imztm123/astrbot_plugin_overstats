@@ -16,7 +16,7 @@
 
 ### 🔒 仓库整理
 - **插件市场身份**：插件市场 ID 为 `owner/name`（`imztm123/astrbot_plugin_overstats`），与原作者的 `Zzzzzzouhang/astrbot_plugin_overstats` 天然隔离，因此**包名保持 `astrbot_plugin_overstats` 不变**；`display_name` 改为「overstats（ZTM 优化版）」用于在市场列表中区分。
-- `metadata.yaml`：`version` → `v2.7.7`，`author` → `Zzzzzzouhang 社区维护`，`repo` → 本仓库；`logo.png` 换为自制图标。
+- `metadata.yaml`：`version` → `v2.7.7`，`author` → `Zzzzzzouhang, ZTM`，`repo` → 本仓库；`logo.png` 换为自制图标。
 - `_conf_schema.json` 的 `backend_repo_url` 默认值、`deploy/ops/manager.py` 的兜底地址，全部改为本仓库地址，避免插件更新时拉回原版覆盖改动。
 - 后端独立为 `Overstats` 仓库：`config/config.py` 改为 `config/config.example.py` 模板，真实 token / API Key 不入库；补齐上游 `res/` 素材与 `bg.png`。
 ## v2.7.5 (2026-09-03)
