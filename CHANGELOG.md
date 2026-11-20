@@ -15,6 +15,8 @@
 - **ID 解析失败文案**：统一为「未查询到id或者id错误，id严格区分大小写（受大神接口维护影响，部分id不可用）」。
 
 ### 🔒 仓库整理
+- **后端仓库地址自动迁移（与原版同包名的升级场景）**：`main.py` 新增 `_migrate_backend_repo_url()`，插件初始化时若发现 `backend_repo_url` 仍指向原版后端（`Zzzzzzouhang/Overstats`、`AddOneSecondL/Overstats`），自动切换为本仓库配套后端并写回配置（用户手动填的其它地址不受影响）。
+- **克隆 origin 自动对齐**：`DeployManager._align_remote()` 在 `/ow部署`、`/ow更新后端` 前比对现有后端目录的 `origin` 与配置中的 `backend_repo_url`，不一致时先 `git remote set-url`，避免"配置已改但仍从原仓库拉取"。
 - **插件市场身份**：插件市场 ID 为 `owner/name`（`imztm123/astrbot_plugin_overstats`），与原作者的 `Zzzzzzouhang/astrbot_plugin_overstats` 天然隔离，因此**包名保持 `astrbot_plugin_overstats` 不变**；`display_name` 改为「overstats（ZTM 优化版）」用于在市场列表中区分。
 - `metadata.yaml`：`version` → `v2.7.7`，`author` → `Zzzzzzouhang, ZTM`，`repo` → 本仓库；`logo.png` 换为自制图标。
 - `_conf_schema.json` 的 `backend_repo_url` 默认值、`deploy/ops/manager.py` 的兜底地址，全部改为本仓库地址，避免插件更新时拉回原版覆盖改动。

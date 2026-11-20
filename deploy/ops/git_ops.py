@@ -372,3 +372,24 @@ async def get_remote_url(repo_dir: str | Path) -> str:
     if rc == 0:
         return stdout.strip()
     return ""
+
+
+def _normalize_repo_url(url: str) -> str:
+    """比较用的归一化：去掉尾部斜杠与 .git，统一小写。"""
+    u = str(url or "").strip().rstrip("/")
+    if u.endswith(".git"):
+        u = u[:-4]
+    return u.lower()
+
+
+async def set_remote_url(repo_dir: str | Path, url: str, remote: str = "origin") -> tuple[bool, str]:
+    """设置（或修正）远程仓库地址：优先 set-url，仓库尚无该 remote 时 add。"""
+    if not url:
+        return False, "远程地址为空"
+    rc, _, _ = await _run_git(["remote", "set-url", remote, url], cwd=repo_dir, timeout=15.0)
+    if rc == 0:
+        return True, f"{remote} -> {url}"
+    rc2, _, stderr2 = await _run_git(["remote", "add", remote, url], cwd=repo_dir, timeout=15.0)
+    if rc2 == 0:
+        return True, f"{remote} -> {url}"
+    return False, stderr2 or "设置远程仓库地址失败"
