@@ -1,11 +1,6 @@
 # Changelog
 
-## v2.7.5.1（ZTM 自用改版）
-
-> 版本号规则：以原版 v2.7.5 为基线，自用改版按 `2.7.5.N` 递增（2.7.5.1 → 2.7.5.2 …）。
-> 起点用 2.7.5.1 而不是 2.7.6，是因为 2.7.6 这个版本号在插件市场已提交过、无法重复上传。
-
-> 基于上游 v2.7.5 修改。上游另有同名 v2.7.6，两者互不兼容，请以仓库地址区分。
+## v2.7.7（ZTM 自用改版）
 
 ### 🐛 修复
 - **「是区吗」无法使用（判定书永远出不来）**：根因是两处代码错位——插件 `deploy/ops/config_writer.py` 的 `_SHIQU_CONFIG_TEMPLATE` 生成的 `ShiquLLMConfig` **没有 `json_mode` 字段**，而后端 `src/modules/dashen_shiqu/service.py:1159` 直接读 `if cfg.json_mode:` 来决定是否加 `response_format={"type":"json_object"}`。结果每次「是区吗」调用 `_call_llm()` 都抛 `AttributeError: 'ShiquLLMConfig' object has no attribute 'json_mode'`，`/dashen-shiqu/image` 返回 500。「开庭」走自带 `json_schema`（`strict: False`）不读该字段，所以只有「是区吗」单点失效。
@@ -21,7 +16,7 @@
 
 ### 🔒 仓库整理
 - **插件市场身份**：插件市场 ID 为 `owner/name`（`imztm123/astrbot_plugin_overstats`），与原作者的 `Zzzzzzouhang/astrbot_plugin_overstats` 天然隔离，因此**包名保持 `astrbot_plugin_overstats` 不变**；`display_name` 改为「overstats（ZTM 优化版）」用于在市场列表中区分。
-- `metadata.yaml`：`version` → `v2.7.5.1`（规则：`2.7.5.N` 递增），`author` → `Zzzzzzouhang, ZTM`，`repo` → 本仓库；`logo.png` 换为自用图标。
+- `metadata.yaml`：`version` → `v2.7.7`，`author` → `Zzzzzzouhang, ZTM`，`repo` → 本仓库；`logo.png` 换为自用图标。
 - `_conf_schema.json` 的 `backend_repo_url` 默认值、`deploy/ops/manager.py` 的兜底地址，全部改为本仓库地址，避免插件更新时拉回原版覆盖改动。
 - 后端独立为 `Overstats` 仓库：`config/config.py` 改为 `config/config.example.py` 模板，真实 token / API Key 不入库；补齐上游 `res/` 素材与 `bg.png`。
 ## v2.7.5 (2026-09-03)
