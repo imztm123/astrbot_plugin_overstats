@@ -17,6 +17,7 @@
 - **ID 解析失败文案**：统一为「未查询到id或者id错误，id严格区分大小写（受大神接口维护影响，部分id不可用）」。
 
 ### 🔒 仓库整理
+- **插件包名改为 `astrbot_plugin_overstats_ztm`**，`display_name` 改为「overstats（ZTM 优化版）」：插件市场身份为 `plugin_id = author/name`，沿用 `astrbot_plugin_overstats` 会被识别成原插件的新版本（挂到原作者条目下），改名后才作为独立插件上架。
 - `metadata.yaml`：`version` → `v2.7.6`，`author` → `Zzzzzzouhang, ZTM`，`repo` → 本仓库；`logo.png` 换为自用图标。
 - `_conf_schema.json` 的 `backend_repo_url` 默认值、`deploy/ops/manager.py` 的兜底地址，全部改为本仓库地址，避免插件更新时拉回原版覆盖改动。
 - 后端独立为 `Overstats` 仓库：`config/config.py` 改为 `config/config.example.py` 模板，真实 token / API Key 不入库；补齐上游 `res/` 素材与 `bg.png`。
