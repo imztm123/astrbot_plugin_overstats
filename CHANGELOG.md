@@ -1,6 +1,9 @@
 # Changelog
 
-## v2.7.6（ZTM 自用改版）
+## v2.7.5.1（ZTM 自用改版）
+
+> 版本号规则：以原版 v2.7.5 为基线，自用改版按 `2.7.5.N` 递增（2.7.5.1 → 2.7.5.2 …）。
+> 起点用 2.7.5.1 而不是 2.7.6，是因为 2.7.6 这个版本号在插件市场已提交过、无法重复上传。
 
 > 基于上游 v2.7.5 修改。上游另有同名 v2.7.6，两者互不兼容，请以仓库地址区分。
 
@@ -18,7 +21,7 @@
 
 ### 🔒 仓库整理
 - **插件市场身份**：插件市场 ID 为 `owner/name`（`imztm123/astrbot_plugin_overstats`），与原作者的 `Zzzzzzouhang/astrbot_plugin_overstats` 天然隔离，因此**包名保持 `astrbot_plugin_overstats` 不变**；`display_name` 改为「overstats（ZTM 优化版）」用于在市场列表中区分。
-- `metadata.yaml`：`version` → `v2.7.6`，`author` → `Zzzzzzouhang, ZTM`，`repo` → 本仓库；`logo.png` 换为自用图标。
+- `metadata.yaml`：`version` → `v2.7.5.1`（规则：`2.7.5.N` 递增），`author` → `Zzzzzzouhang, ZTM`，`repo` → 本仓库；`logo.png` 换为自用图标。
 - `_conf_schema.json` 的 `backend_repo_url` 默认值、`deploy/ops/manager.py` 的兜底地址，全部改为本仓库地址，避免插件更新时拉回原版覆盖改动。
 - 后端独立为 `Overstats` 仓库：`config/config.py` 改为 `config/config.example.py` 模板，真实 token / API Key 不入库；补齐上游 `res/` 素材与 `bg.png`。
 ## v2.7.5 (2026-09-03)
