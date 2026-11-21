@@ -388,6 +388,36 @@ class DeployManager:
     # 生命周期管理
     # ------------------------------------------------------------------ #
 
+    async def ensure_repo_alignment(self) -> tuple[bool, str]:
+        """确保已有后端克隆的 origin 与配置里的 backend_repo_url 一致（只改 remote，不拉代码）。
+
+        用于插件加载 / 重启后端时自动纠正：从原版插件覆盖升级过来的实例，
+        配置被迁移成新仓库后，磁盘上的克隆目录 origin 仍指向原仓库，
+        若用户此时直接 /ow更新后端 就会拉回原作者的代码。返回 (是否发生了切换, 说明)。
+        """
+        if self.mode != "auto":
+            return False, "manual 模式无需对齐"
+        if not (self._backend_dir.exists() and (self._backend_dir / ".git").exists()):
+            return False, "后端未部署"
+        try:
+            remote = await git_ops.get_remote_url(self._backend_dir)
+        except Exception as e:
+            return False, f"读取 origin 失败: {e}"
+        target = self.repo_url
+        if not remote or not target:
+            return False, "缺少 origin 或配置地址"
+        if git_ops._normalize_repo_url(remote) == git_ops._normalize_repo_url(target):
+            return False, "origin 已一致"
+        ok, msg = await git_ops.set_remote_url(self._backend_dir, target)
+        if ok:
+            logger.warning(
+                f"[OverstatsDeploy] 后端 origin 与配置不一致，已自动切换：{remote} → {target}。"
+                f"当前磁盘上的代码仍可能是原仓库版本，建议执行一次 /ow更新后端 拉取配套后端。"
+            )
+            return True, f"{remote} → {target}"
+        logger.error(f"[OverstatsDeploy] 自动切换后端 origin 失败: {msg}")
+        return False, msg
+
     async def start(self) -> DeployResult:
         """启动已部署的后端（不重新部署）。"""
         start_time = time.time()
@@ -431,6 +461,11 @@ class DeployManager:
     async def restart(self) -> DeployResult:
         """重启后端：先停止再启动。"""
         await self.stop()
+        # 重启前顺带对齐 origin，避免配置改了但克隆目录仍指向原仓库
+        try:
+            await self.ensure_repo_alignment()
+        except Exception as e:
+            logger.warning(f"[OverstatsDeploy] 重启前对齐 origin 失败: {e}")
         await asyncio.sleep(1.0)
         return await self.start()
 
