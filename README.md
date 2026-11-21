@@ -1,4 +1,4 @@
-# overstats · ZTM 适配优化版（v2.7.7）
+# overstats · 社区维护版（v2.7.7）
 
 > ## ⚠️ 声明
 >
@@ -6,9 +6,9 @@
 >
 > - 原作者：**[@Zzzzzzouhang](https://github.com/Zzzzzzouhang)**（插件本体）
 > - 后端服务：[`Zzzzzzouhang/Overstats`](https://github.com/Zzzzzzouhang/Overstats) / [`AddOneSecondL/Overstats`](https://github.com/AddOneSecondL/Overstats)
-> - 二次修改：**ZTM**（[`imztm123`](https://github.com/imztm123)）
+> - 维护：**社区维护版**（[`imztm123`](https://github.com/imztm123) 接手维护）
 > - 本仓库：`imztm123/astrbot_plugin_overstats`，版本 `v2.7.7`
-> - 插件包名沿用 `astrbot_plugin_overstats`；市场身份为 `owner/name`（即 `imztm123/astrbot_plugin_overstats`），与原作者的 `Zzzzzzouhang/...` 天然隔离。市场卡片标题为「overstats（ZTM 优化版）」以示区分
+> - 插件包名沿用 `astrbot_plugin_overstats`；市场身份为 `owner/name`（即 `imztm123/astrbot_plugin_overstats`），与原作者的 `Zzzzzzouhang/...` 天然隔离。市场卡片标题为「overstats（社区维护版）」以示区分
 > - 版权与许可沿用原仓库 [LICENSE](./LICENSE)
 >
 
@@ -110,7 +110,7 @@ chain = []
 > 参考数据：2 账号 + `8/14` 的配置下，跨海查询战绩与竞技强度的等待时间明显下降；单账号维持默认即可，收益极小且容易触发限流。
 ## 4) 其它改动
 
-- `metadata.yaml`：`version` → `v2.7.7`，`author` → `Zzzzzzouhang, ZTM`，`repo` → 本仓库；`logo.png` 换为自制图标（1:1，256×256）。
+- `metadata.yaml`：`version` → `v2.7.7`，`author` → `Zzzzzzouhang 社区维护`，`repo` → 本仓库；`logo.png` 换为自制图标（1:1，256×256）。
 - `_conf_schema.json` 的 `backend_repo_url` 默认值、`deploy/ops/manager.py` 的兜底地址，全部指向本仓库，避免插件更新时拉回原版覆盖改动。
 - `deploy/ops/config_writer.py`、`deploy/ops/manager.py` 增加 `[Shiqu诊断]` 日志（仅打印布尔值），便于排查是区吗 LLM 配置是否下发成功。
 - ID 解析失败文案统一为「未查询到id或者id错误，id严格区分大小写（受大神接口维护影响，部分id不可用）」。

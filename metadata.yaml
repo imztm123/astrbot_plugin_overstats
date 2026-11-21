@@ -1,7 +1,7 @@
 name: astrbot_plugin_overstats
-display_name: overstats（ZTM 优化版）
+display_name: overstats（社区维护版）
 desc: overstats守望先锋战绩查询工具（在原版基础上，对不断更新的 AstrBot 做适配性更新与优化）
 short_desc: 守望先锋国服数据查询AstrBot插件，提供一键部署功能，查询数据渲染成图片。
 version: v2.7.7
-author: Zzzzzzouhang, ZTM
+author: Zzzzzzouhang 社区维护
 repo: https://github.com/imztm123/astrbot_plugin_overstats
