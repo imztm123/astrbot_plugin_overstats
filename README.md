@@ -10,7 +10,6 @@
 > - 本仓库：`imztm123/astrbot_plugin_overstats`，版本 `v2.7.6`
 > - 版权与许可沿用原仓库 [LICENSE](./LICENSE)
 >
-> 上游另有同名 v2.7.6，两者互不兼容，请以**仓库地址**区分。需要完整功能与长期维护请优先使用原仓库。
 
 一款为 [AstrBot](https://github.com/AstrBotDevs/AstrBot) 打造的守望先锋数据查询插件，作为桥梁连接由网易大神接口驱动的 [Overstats](https://github.com/AddOneSecondL/Overstats) 后端服务，为群聊带来守望先锋战绩查询与资讯体验。
 
