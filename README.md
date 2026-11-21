@@ -1,5 +1,7 @@
 # overstats · 社区维护版（v2.7.7）
 
+> **关于判定书内容口径**：上游 `4ba5957e`（2026-11-13）把是区吗的提示词改成「只喂 0-100 同英雄参考指数、禁止出现原始数值」，生成内容随之变成各种指数。配套后端仓库 `imztm123/Overstats` 已把 `src/modules/dashen_shiqu/`（`service.py` / `stat_db.py` / `render.py` / `__init__.py`）回退到该提交之前的版本，判定书回到「伤害 / 治疗 / 命中率等精确局内数字」的原版口径。`json_mode` 字段仍保留在生成的 `shiqu_config.py` 里：旧版代码不读它，日后若跟进上游新版则自动生效。
+
 > ## ⚠️ 声明
 >
 > **本项目是基于原版 [`astrbot_plugin_overstats`](https://github.com/Zzzzzzouhang/astrbot_plugin_overstats) 二次修改的版本**：在原版基础上，针对不断更新的 AstrBot 做适配性更新与优化（`@` 渲染变更、消息链兼容、插件市场接入等），并非原创项目。
