@@ -1,4 +1,4 @@
-# astrbot_plugin_overstats（自用优化版 v2.7.6）
+# overstats · ZTM 自用优化版（v2.7.6）
 
 > ## ⚠️ 声明
 >
@@ -8,6 +8,7 @@
 > - 后端服务：[`Zzzzzzouhang/Overstats`](https://github.com/Zzzzzzouhang/Overstats) / [`AddOneSecondL/Overstats`](https://github.com/AddOneSecondL/Overstats)
 > - 二次修改：**ZTM**（[`imztm123`](https://github.com/imztm123)）
 > - 本仓库：`imztm123/astrbot_plugin_overstats`，版本 `v2.7.6`
+> - **插件包名：`astrbot_plugin_overstats_ztm`**（与原版 `astrbot_plugin_overstats` 区分，避免在插件市场与原条目撞名）
 > - 版权与许可沿用原仓库 [LICENSE](./LICENSE)
 >
 
@@ -52,8 +53,8 @@ AttributeError: 'ShiquLLMConfig' object has no attribute 'json_mode'
 
 ```bash
 python3 scripts/fix_shiqu_config.py \
-  --plugin  /AstrBot/data/plugins/astrbot_plugin_overstats \
-  --backend /AstrBot/data/plugin_data/astrbot_plugin_overstats/overstats_backend
+  --plugin  /AstrBot/data/plugins/astrbot_plugin_overstats_ztm \
+  --backend /AstrBot/data/plugin_data/astrbot_plugin_overstats_ztm/overstats_backend
 ```
 
 脚本流程：`ast` 静态读取现有配置 → 三项任一为空即中止（绝不用空值覆盖把 Key 抹掉）→ `importlib` 加载插件 `config_writer.py` → 备份为 `shiqu_config.py.bak.<时间戳>` → `write_shiqu_config()` 重写（内含 `py_compile` 语法校验）→ 失败自动回滚 → 提示重启后端。只输出「正常 / 缺失」，不打印密钥。修复后执行 `/ow重启后端` 生效。
@@ -177,6 +178,8 @@ git clone https://github.com/imztm123/astrbot_plugin_overstats.git
 ```
 
 装完重载插件，进入配置面板按下一节填写。
+
+> 安装后插件目录名 = 包名 `astrbot_plugin_overstats_ztm`（与原版并存不冲突：两者的 `name` 不同，AstrBot 视为两个独立插件，可同时安装）。
 
 ---
 
@@ -409,7 +412,7 @@ git clone https://github.com/imztm123/astrbot_plugin_overstats.git
 本仓库只放**外层插件**，后端是独立仓库、由插件在 auto 模式下 clone。
 
 ```
-astrbot_plugin_overstats/          ← 本仓库根目录 = AstrBot 插件本体
+astrbot_plugin_overstats/          ← 本仓库根目录 = AstrBot 插件本体（安装后目录名为包名）
 ├── main.py                        # 指令注册与事件分发（单体）
 ├── metadata.yaml                  # name/display_name/version/author/repo
 ├── _conf_schema.json              # 配置面板 schema
@@ -427,7 +430,7 @@ astrbot_plugin_overstats/          ← 本仓库根目录 = AstrBot 插件本体
 后端 `Overstats` 被 clone 到 AstrBot 数据目录：
 
 ```
-<AstrBot>/data/plugin_data/astrbot_plugin_overstats/
+<AstrBot>/data/plugin_data/astrbot_plugin_overstats_ztm/
 ├── overstats_backend/             # ← clone 自 https://github.com/imztm123/Overstats.git
 │   ├── config/config.example.py   # 配置模板（复制成 config.py 后填写）
 │   ├── config/shiqu_config.py     # 是区吗 LLM 配置（插件部署时自动覆盖）
@@ -450,7 +453,7 @@ astrbot_plugin_overstats/          ← 本仓库根目录 = AstrBot 插件本体
 | `是区吗` 提示「功能暂未对普通用户开放」 | 在 `shiqu_cd_map` 里设 `"normal_enabled": true` |
 | 图片消息里出现 `@` 乱码 | 确认跑的是本仓库版本（出站链已无 `Comp.At`） |
 | 查询很慢 / 报 429 | `dashen_max_concurrent_requests` 过大。按「≤ 账号数 × 4」调小，或增加账号 |
-| 插件更新后改动没了 | 检查安装来源是否为 `imztm123/astrbot_plugin_overstats` |
+| 插件更新后改动没了 | 检查安装来源是否为 `imztm123/astrbot_plugin_overstats`；装好后插件目录名应为 `astrbot_plugin_overstats_ztm` |
 | `/ow更新后端` 后后端被重置 | 检查 `backend_repo_url` 是否指向原仓库 |
 | 全量适配不生效 | 群主需在「机器人设置 → 机器人可获取消息范围」开启「获取群内全部消息」 |
 | 面板监控全是空 | 配 `sqlite_db_path` 指向后端 `match_stats.sqlite3` |
