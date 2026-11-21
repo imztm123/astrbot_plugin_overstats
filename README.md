@@ -82,29 +82,31 @@ chain = []
 
 入站方向不受影响：「是否真实 @ 了机器人」仍由 `_is_real_at_bot()` 按 `event.get_self_id()` 比对 `Comp.At.qq`，并排除 QQ 官方占位 `self_id`（`qq_official` / `unknown_selfid`），不依赖文本里的 `@`。
 
-## 3) 优化多账号轮询与请求并发，提升跨海战绩 / 竞技强度响应速度
+## 3) 并发与账号轮询：默认保持上游，按需自助调优
 
-**插件面板（auto 模式会写进后端 `config.py`）默认值已上调**：
+**先说明一件事**：账号池轮询是 **Overstats 上游本身就有的机制**（`DASHEN_ACCOUNTS` 配多个账号即自动在池内分摊请求），本版没有改动这部分代码。
 
-| 配置项 | 上游默认 | 本版默认 | 作用 |
-| --- | --- | --- | --- |
-| `dashen_account_max_requests_per_second` | `5` | **`8`** | 单账号每秒请求上限 |
-| `dashen_max_concurrent_requests` | `2` | **`14`** | 进程内全局并发上限 |
-| `DASHEN_MAX_ACCEPTED_REQUESTS` | `账号数×4` | `账号数×4`（2 账号 = 8） | 随账号数自动放大上游允许的「活跃 + 排队」上限，减少 429 |
-| `dashen_accounts` / `dashen_accounts_bulk` | 单账号 | **多账号轮询** | 账号池内分摊请求，跨海查询不再卡在单账号配额 |
+本版也**没有修改默认并发参数**，面板与后端示例配置一律保持上游默认值：
 
-**后端代码层还有三处兜底常量**（`Overstats` 仓库）：
+| 配置项 | 默认值 | 说明 |
+| --- | --- | --- |
+| `dashen_account_max_requests_per_second` | `5` | 单账号每秒请求上限 |
+| `dashen_max_concurrent_requests` | `2` | 进程内全局并发上限 |
+| `DASHEN_MAX_ACCEPTED_REQUESTS` | `账号数 × 4` | 上游硬限制：超过（活跃+排队）直接返回 429 |
 
-| 文件 | 改动 |
-| --- | --- |
-| `src/client/apiclient.py:194` | `DASHEN_MAX_CONCURRENT_REQUESTS` 读取兜底 `2` → **`12`** |
-| `src/modules/dashen_quick_strength/engine.py:30` | `DEFAULT_MATCH_CONCURRENCY` `4` → **`12`** |
-| `src/modules/dashen_competitive_strength/engine.py:23` | `DEFAULT_MATCH_CONCURRENCY` `4` → **`12`** |
+**为什么不做成"更高"的默认值**：上游接口对「账号数 × 4」以上的请求直接返回 429。单账号用户把并发调到 12/14 只会换来满屏限流，所以默认值必须按最小可用配置给。
 
-后三处是「快速强度 / 竞技强度一次拉多局」的真实并行度，也是体感变快的主因。插件侧的指令限流结构保持上游不变（单用户并发上限 `3`、槽位 300 秒自动释放），所以后端提速不会放大群内刷屏压力。
+**想要更快，按自己的账号数调**（在插件面板改，auto 模式会写进后端 `config.py`）：
 
-> ⚠️ 账号数少时把并发调到 14 容易触发上游 429，请按实际账号数调整：经验值是「全局并发 ≤ 账号数 × 4」。
+| 账号数 | `max_requests_per_second` | `max_concurrent_requests` |
+| --- | --- | --- |
+| 1 个（默认） | `5` | `2` |
+| 2 个（本机实测） | `8` | `14` |
+| 3 个及以上 | `8` | `≤ 账号数 × 4` |
 
+调完执行 `/ow重启后端` 生效。经验规则：**全局并发 ≤ 账号数 × 4**，越过这条线就是 429。
+
+> 参考数据：2 账号 + `8/14` 的配置下，跨海查询战绩与竞技强度的等待时间明显下降；单账号维持默认即可，收益极小且容易触发限流。
 ## 4) 其它改动
 
 - `metadata.yaml`：`version` → `v2.7.6`，`author` → `Zzzzzzouhang, ZTM`，`repo` → 本仓库；`logo.png` 换为自用图标（1:1，256×256）。
@@ -153,7 +155,7 @@ chain = []
 
 ## manual 模式准备
 
-1. 自行部署 [Overstats](https://github.com/AddOneSecondL/Overstats) 后端（本仓库配套的后端在 [`imztm123/Overstats`](https://github.com/imztm123/Overstats)，已含双账号轮询与并发调优）。
+1. 自行部署 [Overstats](https://github.com/AddOneSecondL/Overstats) 后端（本仓库配套的后端在 [`imztm123/Overstats`](https://github.com/imztm123/Overstats)，配置模板与插件面板默认值保持一致）。
 2. 确认后端 API 端口可被 AstrBot 所在服务器访问（后端默认 `18081`，manual 面板默认填 `18080`，按实际改）。
 3. 需监听全部网卡时，改后端 `config/config.py` 的 `API_HOST = "0.0.0.0"`，并在服务器防火墙放行对应端口。
 

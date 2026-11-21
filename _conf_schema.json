@@ -198,8 +198,8 @@
   "dashen_account_max_requests_per_second": {
     "description": "【AUTO】单账号每秒最大请求数",
     "type": "int",
-    "hint": "auto 模式下生效。单个大神账号每秒最大请求频率限制，默认 8（上游默认 5；账号数少时不宜再调高，否则易触发 429）。",
-    "default": 8
+    "hint": "auto 模式下生效。单个大神账号每秒最大请求频率限制，默认 5。配置多个大神账号后可适当调高，但需保证「全局并发 ≤ 账号数 × 4」，否则上游直接返回 429。",
+    "default": 5
   },
   "dashen_account_rate_limit_window_seconds": {
     "description": "【AUTO】限流窗口（秒）",
@@ -216,8 +216,8 @@
   "dashen_max_concurrent_requests": {
     "description": "【AUTO】最大并发请求数",
     "type": "int",
-    "hint": "auto 模式下生效。后端同时向上游发起的最大并发请求数，默认 14（上游默认 2）。上游对「账号数 × 4」以上的请求直接返回 429，账号少时请同步降低。",
-    "default": 14
+    "hint": "auto 模式下生效。后端同时向上游发起的最大并发请求数，默认 2。上游对「账号数 × 4」以上的请求（活跃+排队）直接返回 429，多账号时可上调，单账号建议保持默认。",
+    "default": 2
   },
   "dashen_international_proxy": {
     "description": "【AUTO】网易大神国际代理",

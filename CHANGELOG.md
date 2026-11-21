@@ -11,8 +11,7 @@
 - **AstrBot v4.29.0「@」乱码**：出站消息链不再拼 `Comp.At(qq=发送者)`，改为 `Plain` 文本 + 图片。`main.py` 的 `_build_image_chain()` 与 `_send_multiple_images_result()` 两处：前者由 `[Comp.At(...), Comp.Plain(...), image]` 改为 `[Comp.Plain(f'{fallback_text}\n'), image]` / `[image]`；后者起始项由 `[Comp.At(...), Comp.Plain('\n')]` 改为空链 `[]`。入站 `@` 判定仍由 `_is_real_at_bot()` 按 `self_id` 比对并排除 QQ 官方占位 `at`，触发不受影响。
 
 ### 🔧 优化
-- **后端并发与账号轮询**：插件面板默认值 `dashen_account_max_requests_per_second` 5 → 8、`dashen_max_concurrent_requests` 2 → 14（`_conf_schema.json`，auto 模式会写进后端 `config.py`）；`DASHEN_ACCOUNTS` 扩到 2 个账号轮询；`DASHEN_MAX_ACCEPTED_REQUESTS` 随账号数放大（2×4=8），减少跨海查询的 429 与排队。
-- **单次多局拉取并发**（`Overstats`）：`src/client/apiclient.py:194` 的 `DASHEN_MAX_CONCURRENT_REQUESTS` 兜底 2 → 12；`dashen_quick_strength/engine.py:30`、`dashen_competitive_strength/engine.py:23` 的 `DEFAULT_MATCH_CONCURRENCY` 均 4 → 12。
+- **并发参数：默认保持上游不改**。账号池轮询是 Overstats 上游自带机制（`DASHEN_ACCOUNTS` 配多账号即在池内分摊），本版未改动该逻辑，也未改动默认并发值（`dashen_account_max_requests_per_second`=5、`dashen_max_concurrent_requests`=2），避免单账号用户命中上游「账号数 × 4」的 429 限制。多账号环境下的调优建议（2 账号可用 8/14）写在 README「一、3」与 `config.example.py` 注释里。
 - **是区吗 LLM 配置下发**：模板增加 `strict` / `json_mode` 开关（默认 true，强制 JSON 输出），降低判定书解析失败概率。
 - **诊断日志**：`config_writer.py` 与 `deploy/ops/manager.py` 增加 `[Shiqu诊断]` 输出，打印 `shiqu_llm_api_base` / `api_key` / `model` 是否已配置（仅布尔值）。
 - **ID 解析失败文案**：统一为「未查询到id或者id错误，id严格区分大小写（受大神接口维护影响，部分id不可用）」。
