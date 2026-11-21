@@ -110,7 +110,7 @@ chain = []
 > 参考数据：2 账号 + `8/14` 的配置下，跨海查询战绩与竞技强度的等待时间明显下降；单账号维持默认即可，收益极小且容易触发限流。
 ## 4) 其它改动
 
-- `metadata.yaml`：`version` → `v2.7.7`，`author` → `Zzzzzzouhang 社区维护`，`repo` → 本仓库；`logo.png` 换为自制图标（1:1，256×256）。
+- `metadata.yaml`：`version` → `v2.7.7`，`author` → `Zzzzzzouhang, ZTM`，`repo` → 本仓库；`logo.png` 换为自制图标（1:1，256×256）。
 - `_conf_schema.json` 的 `backend_repo_url` 默认值、`deploy/ops/manager.py` 的兜底地址，全部指向本仓库，避免插件更新时拉回原版覆盖改动。
 - `deploy/ops/config_writer.py`、`deploy/ops/manager.py` 增加 `[Shiqu诊断]` 日志（仅打印布尔值），便于排查是区吗 LLM 配置是否下发成功。
 - ID 解析失败文案统一为「未查询到id或者id错误，id严格区分大小写（受大神接口维护影响，部分id不可用）」。
