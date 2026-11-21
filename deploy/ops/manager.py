@@ -7,7 +7,6 @@ deploy / start / stop / restart / update / status 等高层接口，
 from __future__ import annotations
 
 import asyncio
-import logging
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -15,7 +14,7 @@ from typing import Optional
 
 from . import config_writer, git_ops, process_runner, uninstaller, venv_ops
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
 # 部署状态常量
 STATE_IDLE = "idle"                # 未部署
@@ -111,9 +110,7 @@ class DeployManager:
         self._deploy_lock = asyncio.Lock()
         self._auto_started = False
 
-    # ------------------------------------------------------------------ #
     # 配置访问
-    # ------------------------------------------------------------------ #
 
     @property
     def mode(self) -> str:
@@ -186,9 +183,7 @@ class DeployManager:
             "github_proxy_custom": str(self._config.get("github_proxy_custom", "") or ""),
         }
 
-    # ------------------------------------------------------------------ #
     # 状态查询
-    # ------------------------------------------------------------------ #
 
     async def get_status(self) -> DeployStatus:
         """获取当前部署状态快照。"""
@@ -246,9 +241,7 @@ class DeployManager:
         elif state in (STATE_RUNNING, STATE_IDLE):
             self._last_error = ""
 
-    # ------------------------------------------------------------------ #
     # 全流程部署
-    # ------------------------------------------------------------------ #
 
     async def _align_remote(self, logs: list[str]) -> None:
         """让已有克隆的 origin 与配置里的 backend_repo_url 保持一致。
@@ -384,9 +377,7 @@ class DeployManager:
                 logs.append(f"[异常] {err}")
                 return DeployResult(False, err, logs, time.time() - start_time)
 
-    # ------------------------------------------------------------------ #
     # 生命周期管理
-    # ------------------------------------------------------------------ #
 
     async def ensure_repo_alignment(self) -> tuple[bool, str]:
         """确保已有后端克隆的 origin 与配置里的 backend_repo_url 一致（只改 remote，不拉代码）。
@@ -551,9 +542,7 @@ class DeployManager:
                 logs.append(f"[异常] {err}")
                 return DeployResult(False, err, logs, time.time() - start_time)
 
-    # ------------------------------------------------------------------ #
     # 自动启动 & 清理
-    # ------------------------------------------------------------------ #
 
     async def maybe_auto_start(self):
         """auto 模式下，若配置了 auto_start_on_boot 则在插件加载时启动后端。
@@ -595,9 +584,7 @@ class DeployManager:
         except Exception as e:
             logger.warning(f"[OverstatsDeploy] cleanup 异常: {e}")
 
-    # ------------------------------------------------------------------ #
     # 后端卸载（独立于插件卸载，实现安全隔离）
-    # ------------------------------------------------------------------ #
 
     def get_uninstaller(self) -> uninstaller.BackendUninstaller:
         """获取后端卸载器实例。"""

@@ -16,13 +16,12 @@
 from __future__ import annotations
 
 import asyncio
-import logging
 import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
 
 @dataclass
@@ -57,9 +56,7 @@ class BackendUninstaller:
         self._venv_dir = Path(venv_dir)
         self._runner = process_runner
 
-    # ------------------------------------------------------------------ #
     # 空间计算
-    # ------------------------------------------------------------------ #
 
     @staticmethod
     def _dir_size_mb(path: Path) -> float:
@@ -93,9 +90,7 @@ class BackendUninstaller:
             "total": round(backend_size + venv_size, 2),
         }
 
-    # ------------------------------------------------------------------ #
     # 卸载预览（不实际删除，供用户确认）
-    # ------------------------------------------------------------------ #
 
     def preview(self) -> dict:
         """预览卸载将影响的资源。
@@ -127,9 +122,7 @@ class BackendUninstaller:
             "db_files": db_files,
         }
 
-    # ------------------------------------------------------------------ #
     # 核心卸载流程
-    # ------------------------------------------------------------------ #
 
     async def uninstall(
         self,

@@ -1,11 +1,10 @@
 """玩家数据类指令逻辑：详情卡片 / 对局 / 单局详细 / 历史段位 / 同玩查询。"""
 import asyncio
 import base64
-import logging
 from astrbot.api.event import AstrMessageEvent
 import aiohttp
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
 
 async def dashen_profile(plugin, event: AstrMessageEvent, arg1: str = '', arg2: str = ''):

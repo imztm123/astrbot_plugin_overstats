@@ -9,7 +9,6 @@
 from __future__ import annotations
 
 import asyncio
-import logging
 import signal
 import sys
 from collections import deque
@@ -18,7 +17,7 @@ from typing import Optional
 
 import aiohttp
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
 _CREATIONFLAGS = 0x08000000 if sys.platform == "win32" else 0
 
@@ -200,7 +199,7 @@ class ProcessRunner:
                 try:
                     line_bytes = await self._process.stdout.readline()
                 except ValueError:
-                    # ponytail: 单行输出超过 chunk limit（如 base64 数据），跳过继续
+                    # 单行输出超长（如 base64）直接跳过
                     continue
                 if not line_bytes:
                     # EOF

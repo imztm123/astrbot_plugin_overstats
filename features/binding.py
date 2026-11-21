@@ -1,9 +1,8 @@
 """绑定相关指令逻辑。"""
 import asyncio
-import logging
 from astrbot.api.event import AstrMessageEvent
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
 
 async def dashen_bind(plugin, event: AstrMessageEvent, bnet_id: str):

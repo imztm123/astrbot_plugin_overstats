@@ -8,12 +8,11 @@
 from __future__ import annotations
 
 import asyncio
-import logging
 import re
 import sys
 from pathlib import Path
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
 # Windows 下 subprocess 需要避免控制台窗口弹出
 _CREATIONFLAGS = 0x08000000 if sys.platform == "win32" else 0

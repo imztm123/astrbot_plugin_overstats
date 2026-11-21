@@ -1,8 +1,7 @@
 """强度 / 云图 / 威能 / 英雄 Pick / 段位分布 类指令逻辑。"""
-import logging
 from astrbot.api.event import AstrMessageEvent
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
 
 async def quick_strength(plugin, event: AstrMessageEvent, arg1: str = '', arg2: str = ''):

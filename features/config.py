@@ -1,9 +1,8 @@
 """群组配置 / 全量消息适配 类指令逻辑。"""
 import asyncio
-import logging
 from astrbot.api.event import AstrMessageEvent
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
 
 async def group_config_cmd(plugin, event: AstrMessageEvent, action: str = '', value: str = ''):

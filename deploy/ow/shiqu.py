@@ -15,13 +15,12 @@
 import asyncio
 import time
 import json
-import logging
 import aiohttp
 from typing import Optional
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
-# ── KV 键前缀 ──
+# KV 键前缀
 _SHIQU_COOLDOWN_KV_PREFIX = "ow_shiqu_cooldown"
 _SHIQU_PENDING_KV_PREFIX = "ow_shiqu_pending"
 _SHIQU_LAST_TARGET_KV_PREFIX = "ow_shiqu_last_target"
@@ -43,8 +42,7 @@ class ShiquManager:
         # 并发守卫所用集合已上移到 plugin._ow_executing（与开庭共用，确保同一用户最多一条在执行）。
 
 
-    # ── 权限 ──
-
+    # 权限
     def _is_admin(self, event) -> bool:
         try:
             return self._plugin._is_astrbot_admin(event)
@@ -57,8 +55,7 @@ class ShiquManager:
         except Exception:
             return str(event.get_sender_id())
 
-    # ── 分级 CD ──
-
+    # 分级 CD
     def _get_config_map(self) -> dict:
         """解析 shiqu_cd_map JSON 配置，失败返回空 dict。
 
@@ -128,8 +125,7 @@ class ShiquManager:
             return False
 
 
-    # ── pending 二次确认 ──
-
+    # pending 二次确认
     async def _set_pending(self, event, ts: int = None):
         """设置 pending 时间戳；ts=0 表示清除 pending。"""
         key = f"{_SHIQU_PENDING_KV_PREFIX}:{self._user_key(event)}"
@@ -147,8 +143,7 @@ class ShiquManager:
         pending_ts = int(pending_ts or 0)
         return pending_ts > 0 and (int(time.time()) - pending_ts) < _SHIQU_PENDING_SECONDS
 
-    # ── 每日首发（凌晨 4 点重置）──
-
+    # 每日首发（凌晨 4 点重置）
     @staticmethod
     def _get_today_4am_ts() -> int:
         """返回最近一次凌晨 4:00 的 Unix 时间戳（本地时间）。"""
@@ -171,8 +166,7 @@ class ShiquManager:
             return True
         return last_ts < self._get_today_4am_ts()
 
-    # ── 最近 target 记录 ──
-
+    # 最近 target 记录
     async def _get_last_target(self, event) -> str:
         key = f"{_SHIQU_LAST_TARGET_KV_PREFIX}:{self._user_key(event)}"
         try:
@@ -187,8 +181,7 @@ class ShiquManager:
         except Exception:
             pass
 
-    # ── 主流程 ──
-
+    # 主流程
     async def run(self, event, bnet_id_input: str = "", match_count: int = 0):
         uid = self._user_key(event)
         # 跨功能并发守卫：同一用户 是区吗 / 开庭 最多一条在执行（与开庭共用 plugin._ow_executing）。
@@ -246,7 +239,7 @@ class ShiquManager:
                 return
 
             # CD 已过、非首发、非 pending → 错误恢复优先，其次白名单快路径，否则展示上次结果+二次确认
-            # ── 失败兜底：cooldown 被 _reset_cooldown 置零（上次查询失败）→ 直接查询，跳过确认（对齐原版错误恢复）──
+            # 失败兜底：cooldown 被 _reset_cooldown 置零（上次查询失败）→ 直接查询，跳过确认（对齐原版错误恢复）
             cd_key = f"{_SHIQU_COOLDOWN_KV_PREFIX}:{uid}"
             try:
                 cd_raw = int(await self._plugin.get_kv_data(cd_key, -1) or -1)
@@ -257,7 +250,7 @@ class ShiquManager:
                     yield r
                 return
 
-            # ── 白名单快路径：上次图片发送成功则跳过二次确认直接查询 ──
+            # 白名单快路径：上次图片发送成功则跳过二次确认直接查询
             if self._plugin._is_whitelisted(event) and await self._is_image_sent(event):
                 async for r in self._do_query(event, uid, target_id, match_count=match_count):
                     yield r
@@ -360,8 +353,7 @@ class ShiquManager:
             yield r
         self._record_cmd('ow是区吗结果', True)
 
-    # ── 连通性检测（指向后端 /healthz）──
-
+    # 连通性检测（指向后端 /healthz）
     async def test_connectivity(self):
         """测试后端可达性，返回 (ok, message)。"""
         base = str(self._plugin.base_url or "")
