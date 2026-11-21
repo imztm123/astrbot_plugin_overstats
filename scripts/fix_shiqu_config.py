@@ -30,7 +30,7 @@ base_url / api_key / model / stream / timeout_seconds / retry，
     python3 fix_shiqu_config.py
     python3 fix_shiqu_config.py \
         --plugin  /AstrBot/data/plugins/astrbot_plugin_overstats_ztm \
-        --backend /AstrBot/data/plugin_data/astrbot_plugin_overstats_ztm/overstats_backend
+        --backend /AstrBot/data/plugin_data/astrbot_plugin_overstats/overstats_backend
 
 改完必须重启后端才生效：群内 /ow重启后端，或 systemctl restart 你的服务。
 """
@@ -44,15 +44,15 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-DEFAULT_PLUGIN = "/AstrBot/data/plugins/astrbot_plugin_overstats_ztm"
+DEFAULT_PLUGIN = "/AstrBot/data/plugins/astrbot_plugin_overstats"
 # AstrBot 的实际数据目录名随版本/安装方式不同：常见是
 #   data/plugin_data/astrbot_plugin_overstats/overstats_backend
 # 老版本/文档里写作
 #   data/plugin_data/overstats_full/overstats_backend
 # 不给 --backend 时按候选列表自动探测。
 DEFAULT_BACKEND_CANDIDATES = (
-    "/AstrBot/data/plugin_data/astrbot_plugin_overstats_ztm/overstats_backend",
     "/AstrBot/data/plugin_data/astrbot_plugin_overstats/overstats_backend",
+    "/AstrBot/data/plugin_data/astrbot_plugin_overstats_ztm/overstats_backend",
     "/AstrBot/data/plugin_data/overstats_full/overstats_backend",
 )
 CLASS_NAME = "ShiquLLMConfig"
