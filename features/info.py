@@ -1,8 +1,7 @@
 """资讯 / 活动 / 商店 / 排行 / 地图 类指令逻辑。"""
-import logging
 from astrbot.api.event import AstrMessageEvent
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
 
 async def ow_shop(plugin, event: AstrMessageEvent):

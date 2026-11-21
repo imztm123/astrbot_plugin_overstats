@@ -14,11 +14,10 @@
 from __future__ import annotations
 
 import sqlite3
-import logging
 from pathlib import Path
 from typing import Optional
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
 
 class BackendMetricsReader:

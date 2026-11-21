@@ -26,8 +26,7 @@ class UserConcurrencyLimiter:
         self._per_user_max = max(0, per_user_max)
         self._timeout_seconds = max(0, timeout_seconds)
 
-    # ── 内部工具（须在持锁时调用）──────────────────────────────
-
+    # 内部工具（须在持锁时调用）
     def _expire_stale_locked(self, user_key: str) -> None:
         """锁内：FIFO 清理该用户过期槽位（过期项必然在队首）。"""
         if self._timeout_seconds <= 0:
@@ -41,8 +40,7 @@ class UserConcurrencyLimiter:
         if not ts:
             self._slots.pop(user_key, None)
 
-    # ── 对外接口 ──────────────────────────────────────────────
-
+    # 对外接口
     async def acquire(self, user_key: Optional[str]) -> bool:
         """尝试获取一个槽位。
 

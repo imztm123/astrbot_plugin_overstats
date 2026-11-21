@@ -16,10 +16,9 @@
 import asyncio
 import time
 import json
-import logging
 from typing import Optional
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
 # 后端图片接口路径（base_url 已含 /api/v2，故此处不带前缀）
 _COURT_IMAGE_ENDPOINT = "/dashen-court/image"
@@ -38,8 +37,7 @@ class CourtManager:
     def __init__(self, plugin):
         self._plugin = plugin
 
-    # ── 权限 ──
-
+    # 权限
     def _is_admin(self, event) -> bool:
         try:
             return self._plugin._is_astrbot_admin(event)
@@ -52,8 +50,7 @@ class CourtManager:
         except Exception:
             return str(event.get_sender_id())
 
-    # ── 分级 CD（与是区吗共用同一配置，但独立计时）──
-
+    # 分级 CD（与是区吗共用同一配置，但独立计时）
     def _get_config_map(self) -> dict:
         """解析 shiqu_cd_map JSON 配置，失败返回空 dict。"""
         cd_raw = self._plugin.config.get("shiqu_cd_map", "{}") or "{}"
@@ -95,8 +92,7 @@ class CourtManager:
         except Exception:
             pass
 
-    # ── 最近 target 记录 ──
-
+    # 最近 target 记录
     async def _get_last_target(self, event) -> str:
         key = f"{_COURT_LAST_TARGET_KV_PREFIX}:{self._user_key(event)}"
         try:
@@ -111,8 +107,7 @@ class CourtManager:
         except Exception:
             pass
 
-    # ── 参数解析 ──────────────────────────────────────────────
-
+    # 参数解析
     @staticmethod
     def _parse_args(arg1: str, arg2: str) -> tuple:
         """解析 ow开庭 [玩家] [序号]，返回 (bnet_id: str|None, index: int|None, error: str|None)。
@@ -149,8 +144,7 @@ class CourtManager:
         if monitor:
             asyncio.ensure_future(monitor.record_command(cmd_name, success, error_code=error_code))
 
-    # ── 主流程 ────────────────────────────────────────────────
-
+    # 主流程
     async def run_court(self, event, arg1: str = "", arg2: str = ""):
         """开庭主流程（薄代理）。与是区吗共用白名单/分级 CD 机制，CD 独立计时；
         同一用户同一时间 是区吗/开庭 最多一条在执行。"""

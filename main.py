@@ -1,6 +1,5 @@
 import os
 import aiohttp
-import logging
 import tempfile
 import asyncio
 import re
@@ -72,7 +71,7 @@ except ImportError:  # 插件作为顶层模块加载时
     from features import admin as features_admin  # type: ignore[no-redef]
     from features import config as features_config  # type: ignore[no-redef]
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
 @register("overstats_full", "YourName", "Overstats 全指令 QQ 机器人插件", "2.7.5")
 class OverstatsPlugin(Star):
@@ -87,7 +86,7 @@ class OverstatsPlugin(Star):
     ``func(self, event, *args)``，内部通过 plugin 访问本类辅助方法）。
     """
 
-    # ===== 类级常量（从原 deploy/plugin_modules/plugin_core.py 恢复）=====
+    # 类级常量
     _GROUP_CONFIG_KV_KEY = "group_feature_config"
     _MAINTENANCE_KV_KEY = "maintenance_state"
     _RATE_LIMIT_USER_REJECT_MSG = '⏳ 你已有指令正在执行，请等待其返回结果后再发起新的指令'
@@ -196,8 +195,9 @@ class OverstatsPlugin(Star):
             self.monitor_sse = MonitorSSEQueue(maxsize=50)
             if self.monitor:
                 _log_handler = MonitorLogHandler(self.monitor, self.monitor_sse)
-                _log_handler.setLevel(logging.ERROR)
-                logging.getLogger('astrbot').addHandler(_log_handler)
+                _log_handler.setLevel(40)
+                if hasattr(logger, 'addHandler'):
+                    logger.addHandler(_log_handler)
                 self._monitor_log_handler = _log_handler
             else:
                 self._monitor_log_handler = None
@@ -878,7 +878,7 @@ class OverstatsPlugin(Star):
         return f'❌ {prefix}：{self.id_resolve_error_hint}'
 
     def _bnet_err(self, cmd: str) -> str:
-        """ponytail: 10 处重复的战网ID必填错误提示，统一收敛到此"""
+        """统一的战网 ID 必填错误提示"""
         return f'❌ 请输入战网ID，如：{cmd} Player#12345\n或先使用 绑定 战网ID，示例：绑定 Player#12345'
 
     async def _prepare_business_status_prompt(self, event: AstrMessageEvent, base_text: str) -> tuple[str | None, str | None, bool]:
@@ -976,9 +976,9 @@ class OverstatsPlugin(Star):
                 except asyncio.CancelledError:
                     pass
         _handler = getattr(self, '_monitor_log_handler', None)
-        if _handler:
+        if _handler and hasattr(logger, 'removeHandler'):
             try:
-                logging.getLogger('astrbot').removeHandler(_handler)
+                logger.removeHandler(_handler)
             except Exception:
                 pass
         if self._http_session and (not self._http_session.closed):
@@ -1362,7 +1362,7 @@ class OverstatsPlugin(Star):
                 positional.append(a)
         return (positional, fields)
 
-    # ===================== 事件监听器（必须保留在 main.py） =====================
+    # 事件监听器（需留在 main.py）
 
     @filter.command('大神绑定', alias={'绑定'})
     async def dashen_bind(self, event: AstrMessageEvent, bnet_id: str):
@@ -1402,7 +1402,7 @@ class OverstatsPlugin(Star):
                 return
         if not msg:
             return
-        # ponytail: 原生 @filter.command 已匹配该事件（斜杠指令），交给原生处理器，避免重复响应
+        # 已命中原生 @filter.command，交给原生处理器，避免重复响应
         if event.get_extra("handlers_parsed_params"):
             return
         if msg.isdigit():
@@ -1510,7 +1510,7 @@ class OverstatsPlugin(Star):
         if self._is_real_at_bot(event):
             return
         msg = (event.message_str or '').strip()
-        # ponytail: 原生 @filter.command 已匹配该事件，交给原生处理器，避免重复响应
+        # 已命中原生 @filter.command，交给原生处理器，避免重复响应
         if event.get_extra("handlers_parsed_params"):
             return
         direct_mode = adapt_cfg.get('mode', 'nickname') == 'direct'
@@ -1606,7 +1606,7 @@ class OverstatsPlugin(Star):
             yield self._plain_error_result(event, f'❌ 指令执行异常：{e}')
             event.stop_event()
 
-    # ===================== 纯文本 / 轻量指令（保留在 main.py） =====================
+    # 纯文本 / 轻量指令
 
     @filter.command('快速指南', alias={'快捷指令'})
     async def quick_guide_command(self, event: AstrMessageEvent):

@@ -6,11 +6,10 @@ pip 安装复用 AstrBot 配置的 PyPI 镜像源加速国内安装。
 from __future__ import annotations
 
 import asyncio
-import logging
 import sys
 from pathlib import Path
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
 _CREATIONFLAGS = 0x08000000 if sys.platform == "win32" else 0
 

@@ -1,9 +1,8 @@
 """战绩总结类指令逻辑：今日 / 昨日 / 周度总结。"""
 import asyncio
-import logging
 from astrbot.api.event import AstrMessageEvent
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
 
 async def dashen_today(plugin, event: AstrMessageEvent, bnet_id: str = ''):

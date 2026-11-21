@@ -1,12 +1,11 @@
 """管理员 / 维护 / 部署 / 卸载 类指令逻辑。"""
 import asyncio
 import time
-import logging
 from datetime import datetime
 from astrbot.api.event import AstrMessageEvent
 import aiohttp
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
 
 def _norm_repo(url: str) -> str:

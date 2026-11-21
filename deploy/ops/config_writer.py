@@ -9,10 +9,9 @@ Overstats 的 config/config.py 是纯 Python 文件，loader.py 仅对 host/port
 """
 from __future__ import annotations
 
-import logging
 from pathlib import Path
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
 # Overstats 默认配置文件的模板（与原项目 config/config.py 保持一致，
 # 仅占位值由本生成器动态填充）。

@@ -1,9 +1,8 @@
 """OW 开庭 / 是区吗 / AI 检测 类指令逻辑（依赖 Ow court / shiqu 业务管理器）。"""
 import asyncio
-import logging
 from astrbot.api.event import AstrMessageEvent
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
 
 async def ow_court(plugin, event: AstrMessageEvent, arg1: str = '', arg2: str = ''):

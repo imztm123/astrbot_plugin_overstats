@@ -11,7 +11,6 @@ MonitorSSEQueue（实时错误推送队列）。
 from __future__ import annotations
 
 import asyncio
-import logging
 import sqlite3
 import time
 import traceback as tb_module
@@ -19,9 +18,9 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
-logger = logging.getLogger("astrbot")
+from astrbot.api import logger
 
-# ── 指令分类映射（用于 _ensure_full_adapt_map 中已定义的分类）──
+# 指令分类映射（用于 _ensure_full_adapt_map 中已定义的分类）
 CMD_CATEGORY_MAP: dict[str, str] = {
     # 基础 & 绑定
     "owhelp": "基础绑定", "所有指令": "基础绑定", "快速指南": "基础绑定", "大神绑定": "基础绑定",
@@ -83,7 +82,7 @@ def _resolve_category(cmd_name: str) -> str:
     return CMD_CATEGORY_MAP.get(canonical, "其他")
 
 
-# ── Soft errors（正常业务结果，不计入成功率，但要在失败原因中展示）──
+# Soft errors（正常业务结果，不计入成功率，但要在失败原因中展示）
 # 这些错误码来自 Overstats 后端：玩家无近期对局 / 战网 ID 无法解析为 token，
 # 属于「用户侧数据缺失」而非「系统故障」，因此成功率计算时将其排除在分母之外。
 SOFT_ERRORS = {"summary_empty", "bnet_not_found"}
@@ -124,8 +123,7 @@ def _range_clause(start: str | None, end: str | None) -> tuple[str, list]:
     return "", []
 
 
-# ── SQL DDL ──
-
+# SQL DDL
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS cmd_records (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -182,8 +180,7 @@ CREATE TABLE IF NOT EXISTS monitor_meta (
 """
 
 
-# ── MonitorCollector ──
-
+# MonitorCollector
 class MonitorCollector:
     """插件级统计采集器（SQLite 持久化）。
 
@@ -231,8 +228,7 @@ class MonitorCollector:
     def uptime_seconds(self) -> float:
         return time.time() - self._started_at
 
-    # ── 写入接口 ──
-
+    # 写入接口
     async def record_command(
         self,
         cmd_name: str,
@@ -283,8 +279,7 @@ class MonitorCollector:
             (rl_type, str(user_id or ""), now),
         )
 
-    # ── 查询接口 ──
-
+    # 查询接口
     async def get_overview(self, start: str = None, end: str = None) -> dict:
         """总览数据（可按时间范围过滤）。
 
@@ -506,8 +501,7 @@ class MonitorCollector:
             return [dict(r) for r in rows]
         return await self._run_sync(_q)
 
-    # ── 维护 ──
-
+    # 维护
     async def clear_all_stats(self) -> int:
         """清空所有统计记录（保留启动时间），返回删除行数。"""
         def _q():
@@ -525,8 +519,7 @@ class MonitorCollector:
         """公共清理入口（terminate 时调用，SQLite 无需显式关闭连接堆）。"""
         pass  # 每次操作都独立连接，无需维护全局连接
 
-    # ── 内部工具 ──
-
+    # 内部工具
     async def _run_sync(self, func_or_sql, params=None):
         if self._loop is None:
             self._loop = asyncio.get_running_loop()
@@ -544,8 +537,7 @@ class MonitorCollector:
         await self._loop.run_in_executor(None, _exec)
 
 
-# ── MonitorSSEQueue ──
-
+# MonitorSSEQueue
 class MonitorSSEQueue:
     """SSE 消息队列（非阻塞入队，超时出队）。"""
 
@@ -574,23 +566,34 @@ class MonitorSSEQueue:
                 yield {"_heartbeat": True}
 
 
-# ── MonitorLogHandler ──
-
-class MonitorLogHandler(logging.Handler):
-    """挂载到 astrbot logger 的 ERROR 级别处理器。
-
-    自动将 ERROR 日志推送到 MonitorCollector 的错误缓冲 + SSE 队列。
-    emit() 仅在 MonitorCollector 可用时执行，失败静默忽略。
-    """
+# MonitorLogHandler
+class MonitorLogHandler:
+    """挂载到 astrbot logger 的 ERROR 级别处理器，把错误日志同步到监控面板。"""
 
     def __init__(self, collector: MonitorCollector, sse_queue: MonitorSSEQueue | None = None):
-        super().__init__(level=logging.ERROR)
+        self.level = 40  # ERROR
+        self.formatter = None
         self._collector = collector
         self._sse_queue = sse_queue
 
-    def emit(self, record: logging.LogRecord) -> None:
+    def setLevel(self, level: int) -> None:
+        self.level = level
+
+    def handle(self, record) -> bool:
+        if getattr(record, "levelno", 0) >= self.level:
+            self.emit(record)
+            return True
+        return False
+
+    def flush(self) -> None:
+        pass
+
+    def close(self) -> None:
+        pass
+
+    def emit(self, record) -> None:
         try:
-            msg = self.format(record) if self.formatter else record.getMessage()
+            msg = self.formatter.format(record) if self.formatter else record.getMessage()
             if len(msg) > 500:
                 msg = msg[:497] + "..."
             tb_text = ""
