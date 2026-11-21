@@ -1,4 +1,4 @@
-# overstats · ZTM 自用优化版（v2.7.7）
+# overstats · ZTM 自用优化版（v2.7.6）
 
 > ## ⚠️ 声明
 >
@@ -7,7 +7,7 @@
 > - 原作者：**[@Zzzzzzouhang](https://github.com/Zzzzzzouhang)**（插件本体）
 > - 后端服务：[`Zzzzzzouhang/Overstats`](https://github.com/Zzzzzzouhang/Overstats) / [`AddOneSecondL/Overstats`](https://github.com/AddOneSecondL/Overstats)
 > - 二次修改：**ZTM**（[`imztm123`](https://github.com/imztm123)）
-> - 本仓库：`imztm123/astrbot_plugin_overstats`，版本 `v2.7.7`
+> - 本仓库：`imztm123/astrbot_plugin_overstats`，版本 `v2.7.6`
 > - 插件包名沿用 `astrbot_plugin_overstats`；市场身份为 `owner/name`（即 `imztm123/astrbot_plugin_overstats`），与原作者的 `Zzzzzzouhang/...` 天然隔离。市场卡片标题为「overstats（ZTM 优化版）」以示区分
 > - 版权与许可沿用原仓库 [LICENSE](./LICENSE)
 >
