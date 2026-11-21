@@ -1,0 +1,11 @@
+﻿# 统一换行，避免 Windows 提交 / Linux 部署（AstrBot）之间的 CRLF 污染
+* text=auto eol=lf
+
+# 二进制，不做换行转换
+*.png  binary
+*.jpg  binary
+*.ico  binary
+*.zip  binary
+*.ttf  binary
+*.woff binary
+*.woff2 binary

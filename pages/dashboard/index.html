@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overstats 监控面板</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css?v=10" />
+</head>
+<body>
+  <!-- 顶部导航 -->
+  <nav class="top-nav" id="top-nav">
+    <div class="nav-left">
+      <span class="nav-logo-mark">&#9678;</span>
+      <span class="nav-title">Overstats 监控</span>
+      <span class="status-dot" id="status-dot" title="运行状态"></span>
+    </div>
+    <div class="nav-center">
+      <button class="nav-tab active" data-page="dashboard">总览</button>
+      <button class="nav-tab" data-page="shiqu">是区吗调用日志</button>
+      <button class="nav-tab" data-page="court">开庭调用日志</button>
+    </div>
+    <div class="nav-right">
+      <span class="nav-uptime" id="nav-uptime">--</span>
+      <button class="btn btn-secondary" id="btn-refresh">刷新</button>
+    </div>
+  </nav>
+
+  <main class="dashboard">
+    <!-- ═══════════ 页面一：总览 ═══════════ -->
+    <div class="page active" id="page-dashboard">
+
+    <!-- 全局时间范围（运行总览 + 指令分析 共用，默认本周） -->
+    <div class="time-range-bar global" id="global-time-range">
+      <span class="time-label">时间范围</span>
+      <div class="time-tabs" id="time-tabs">
+        <button class="timetab" data-range="24h">24 小时</button>
+        <button class="timetab" data-range="3d">三天</button>
+        <button class="timetab active" data-range="week">本周</button>
+        <button class="timetab" data-range="month">本月</button>
+        <button class="timetab" data-range="all">全部</button>
+      </div>
+      <div class="custom-range">
+        <input type="date" id="range-start" class="text-input" title="开始日期" />
+        <span class="range-sep">至</span>
+        <input type="date" id="range-end" class="text-input" title="结束日期" />
+        <button class="btn btn-compact" id="btn-apply-range">应用</button>
+      </div>
+      <span class="range-summary" id="range-summary"></span>
+    </div>
+
+    <!-- 第一栏：运行总览（4 张指标卡） -->
+    <section class="section" id="section-overview">
+      <h2 class="section-title">运行总览 <span class="section-overline">概览</span> <span id="init-status" style="font-size:13px;color:var(--c-error);margin-left:8px">(初始化中...)</span></h2>
+      <div class="metrics-grid" id="metrics-grid">
+        <div class="feature-card metric-card">
+          <span class="metric-label">运行时长</span>
+          <span class="metric-value" id="m-uptime">--</span>
+        </div>
+        <div class="feature-card metric-card">
+          <span class="metric-label">指令调用</span>
+          <span class="metric-value" id="m-total-cmds">--</span>
+        </div>
+        <div class="feature-card metric-card">
+          <span class="metric-label">成功率</span>
+          <span class="metric-value" id="m-success-rate">--</span>
+        </div>
+        <div class="feature-card metric-card">
+          <span class="metric-label">API 请求</span>
+          <span class="metric-value" id="m-api-total">--</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 第二栏：指令分析 -->
+    <section class="section" id="section-commands">
+      <h2 class="section-title">指令分析 <span class="section-overline">统计</span></h2>
+      <div class="cmd-controls">
+        <div class="category-tabs" id="category-tabs"></div>
+        <div class="cmd-controls-right">
+          <input type="text" class="text-input" id="cmd-search" placeholder="搜索指令..." />
+          <button class="btn btn-compact" id="btn-expand-cmds">展开全部</button>
+        </div>
+      </div>
+      <div class="cmd-list-compact" id="cmd-list"></div>
+      <div class="cmd-failures-panel" id="cmd-failures-panel" style="display:none"></div>
+      <div class="charts-grid">
+        <div class="chart-panel">
+          <h3 class="subsection-title">调用趋势</h3>
+          <div class="line-chart-wrap" id="trend-chart">
+            <svg class="line-chart-svg" viewBox="0 0 600 200" preserveAspectRatio="xMidYMid meet" id="trend-svg"></svg>
+          </div>
+        </div>
+        <div class="chart-panel">
+          <h3 class="subsection-title" id="hourly-title">时段分布</h3>
+          <div class="bar-chart" id="hourly-chart"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 第三栏：后端 API 性能 -->
+    <section class="section section-dark" id="section-backend-perf">
+      <h2 class="section-title on-dark">后端 API 性能 <span class="badge badge-coral">延迟</span></h2>
+      <div class="dark-card" id="backend-perf-list">
+        <p class="on-dark-soft">加载中...<span id="perf-db-info" class="caption"></span></p>
+      </div>
+      <div id="slow-endpoints" style="margin-top:16px"></div>
+    </section>
+
+    <!-- 第四栏：上游 API 统计 -->
+    <section class="section" id="section-upstream">
+      <h2 class="section-title">上游 API 统计 <span class="badge badge-pill">前 15</span></h2>
+      <div class="cmd-list" id="upstream-list">
+        <p class="muted">加载中...</p>
+      </div>
+    </section>
+
+    <!-- 第五栏：部署 & 限流 -->
+    <section class="section section-dark" id="section-deploy">
+      <h2 class="section-title on-dark">部署与限流</h2>
+      <div class="dark-card-grid" id="deploy-grid">
+        <div class="dark-card-item">
+          <h4 class="card-label">部署状态</h4>
+          <div id="deploy-details"></div>
+        </div>
+        <div class="dark-card-item">
+          <h4 class="card-label">限流控制</h4>
+          <div id="rate-limit-details"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 第六栏：错误日志 -->
+    <section class="section section-dark-full" id="section-errors">
+      <h2 class="section-title on-dark">错误日志 <span class="badge badge-coral" id="badge-live" style="display:none">实时</span></h2>
+      <div class="err-controls">
+        <div class="category-tabs" id="err-level-tabs">
+          <button class="tab active" data-level="">全部</button>
+          <button class="tab" data-level="ERROR">错误</button>
+          <button class="tab" data-level="WARNING">警告</button>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary-on-dark" id="btn-clear-errors">清空视图</button>
+          <button class="btn btn-secondary-on-dark" id="btn-clear-stats" style="background:rgba(198,69,69,0.25);color:#e07070">清空全部统计</button>
+        </div>
+      </div>
+      <div class="code-window" id="error-log">
+        <p class="code-line on-dark-soft">暂无错误记录。</p>
+      </div>
+    </section>
+
+    </div><!-- /#page-dashboard -->
+
+    <!-- ═══════════ 页面二：是区吗调用日志 ═══════════ -->
+    <div class="page" id="page-shiqu">
+
+    <section class="section">
+      <h2 class="section-title">是区吗调用日志 <span class="section-overline">LLM分析</span></h2>
+
+      <!-- 汇总卡片 -->
+      <div class="metrics-grid" id="shiqu-summary-grid"></div>
+
+      <!-- 筛选栏 + 分页 -->
+      <div class="cmd-controls" style="margin-top:var(--s-md)">
+        <div style="display:flex;align-items:center;gap:var(--s-sm);flex-wrap:wrap">
+          <input type="text" class="text-input" id="shiqu-search" placeholder="搜索玩家/判定..." style="width:180px" />
+          <select class="text-input" id="shiqu-success-filter" style="width:120px">
+            <option value="">全部状态</option>
+            <option value="true">成功</option>
+            <option value="false">失败</option>
+          </select>
+          <button class="btn btn-compact" id="btn-shiqu-search">搜索</button>
+          <button class="btn btn-compact" id="btn-shiqu-reset">重置</button>
+        </div>
+        <div class="shiqu-pagination" id="shiqu-pagination"></div>
+      </div>
+
+      <!-- 表格 + 详情面板 布局 -->
+      <div class="shiqu-layout" id="shiqu-layout">
+        <div class="shiqu-table-wrap" id="shiqu-table-wrap">
+          <table class="shiqu-table" id="shiqu-table">
+            <thead>
+              <tr>
+                <th>时间</th>
+                <th>目标玩家</th>
+                <th>耗时</th>
+                <th>状态</th>
+                <th>响应</th>
+              </tr>
+            </thead>
+            <tbody id="shiqu-tbody">
+              <tr><td colspan="5" class="shiqu-loading">加载中...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 右侧详情面板 -->
+        <aside class="shiqu-side-panel" id="shiqu-side-panel">
+          <div class="shiqu-side-header">
+            <span class="shiqu-side-title" id="shiqu-side-title">LLM 分析详情</span>
+            <span class="shiqu-side-mode" id="shiqu-side-mode"></span>
+            <button class="shiqu-side-copy" id="shiqu-side-copy" title="复制提示词" style="display:none">复制</button>
+            <button class="shiqu-side-close" id="shiqu-side-close" title="关闭">&times;</button>
+          </div>
+          <div class="shiqu-side-body" id="shiqu-side-body">
+            <p class="shiqu-side-placeholder">← 点击左侧表格行查看 <b>LLM 分析详情</b><br>点击「状态」列下的数字查看 <b>本次提示词</b></p>
+          </div>
+        </aside>
+      </div>
+
+    </section>
+
+    </div><!-- /#page-shiqu -->
+
+    <!-- ═══════════ 页面三：开庭调用日志 ═══════════ -->
+    <div class="page" id="page-court">
+
+    <section class="section">
+      <h2 class="section-title">开庭调用日志 <span class="section-overline">电竞法庭</span></h2>
+
+      <!-- 汇总卡片 -->
+      <div class="metrics-grid" id="court-summary-grid"></div>
+
+      <!-- 筛选栏 + 分页 -->
+      <div class="cmd-controls" style="margin-top:var(--s-md)">
+        <div style="display:flex;align-items:center;gap:var(--s-sm);flex-wrap:wrap">
+          <input type="text" class="text-input" id="court-search" placeholder="搜索玩家..." style="width:180px" />
+          <select class="text-input" id="court-success-filter" style="width:120px">
+            <option value="">全部状态</option>
+            <option value="true">成功</option>
+            <option value="false">失败</option>
+          </select>
+          <button class="btn btn-compact" id="btn-court-search">搜索</button>
+          <button class="btn btn-compact" id="btn-court-reset">重置</button>
+        </div>
+        <div class="shiqu-pagination" id="court-pagination"></div>
+      </div>
+
+      <!-- 表格 + 详情面板 布局 -->
+      <div class="shiqu-layout" id="court-layout">
+        <div class="shiqu-table-wrap" id="court-table-wrap">
+          <table class="shiqu-table" id="court-table">
+            <thead>
+              <tr>
+                <th>时间</th>
+                <th>目标玩家</th>
+                <th>地图</th>
+                <th>耗时</th>
+                <th>状态</th>
+                <th>响应</th>
+              </tr>
+            </thead>
+            <tbody id="court-tbody">
+              <tr><td colspan="6" class="shiqu-loading">加载中...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 右侧详情面板 -->
+        <aside class="shiqu-side-panel" id="court-side-panel">
+          <div class="shiqu-side-header">
+            <span class="shiqu-side-title" id="court-side-title">开庭判决书</span>
+            <button class="shiqu-side-copy" id="court-side-copy" title="复制提示词" style="display:none">复制</button>
+            <button class="shiqu-side-close" id="court-side-close" title="关闭">&times;</button>
+          </div>
+          <div class="shiqu-side-body" id="court-side-body">
+            <p class="shiqu-side-placeholder">← 点击左侧表格行查看 <b>开庭判决书</b><br>点击「状态」列下的数字查看 <b>本次提示词</b></p>
+          </div>
+        </aside>
+      </div>
+
+    </section>
+
+    </div><!-- /#page-court -->
+
+  </main>
+
+  <script src="/api/plugin/page/bridge-sdk.js"></script>
+  <script src="./app.js?v=14"></script>
+</body>
+</html>
