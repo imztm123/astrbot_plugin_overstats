@@ -1,5 +1,19 @@
 # Changelog
 
+## v2.7.8（社区维护版）
+
+### ✅ 合规
+- **日志记录器规范化**：按 AstrBot 插件上架规范，全仓 20 个文件（`main.py`、`deploy/ops/*`、`deploy/ow/*`、`features/*`）移除 `import logging` 与 `logging.getLogger(...)`，统一改为 `from astrbot.api import logger`。
+- **监控日志 handler 解耦**：`deploy/ow/monitor.py` 的 `MonitorLogHandler` 不再继承 `logging.Handler`，改为鸭子类型实现（`level` / `setLevel` / `handle` / `flush` / `close` / `emit`），错误日志捕获与 SSE 推送行为不变。
+- **日志挂载/卸载加固**：`main.py` 改用 `hasattr(logger, 'addHandler')` 判断后再挂载/摘除 handler，兼容不同 AstrBot 版本的 logger 实现。
+
+### 🔧 优化
+- **插件加载 / 重启即对齐后端 origin**：新增 `DeployManager.ensure_repo_alignment()`，插件初始化与 `/ow重启后端` 时检查磁盘克隆目录的 `origin` 是否与 `backend_repo_url` 一致，不一致立即 `git remote set-url` 纠正并记录警告，避免「配置已迁移但克隆目录仍指原仓库、一更新就拉回原作者代码」。
+- **部署状态显示后端仓库**：`/ow部署状态` 与监控面板新增 `🌐 后端仓库` 一行，origin 与配置不一致时直接标注「⚠️ 与配置不一致，建议执行 /ow更新后端」，并列出期望仓库。
+- **判定书数值显示取整**（配套后端 `imztm123/Overstats`）：计数类统计（消灭 / 阵亡 / 最后一击 / 治疗量等）取整，比率类（命中率 / 占比）保留 1 位小数，行协议参与率改为 `86.8%` 形式；解决 `26.56 消灭`、`0.97 阵亡` 这类归一化小数被模型照抄进点评的问题。
+- **注释风格整理**：清理代码中的横线分隔框与调试标记，保留全部指令帮助文档。
+
+
 ## v2.7.7（社区维护版）
 
 ### 🐛 修复
