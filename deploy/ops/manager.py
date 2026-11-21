@@ -241,6 +241,29 @@ class DeployManager:
     # 全流程部署
     # ------------------------------------------------------------------ #
 
+    async def _align_remote(self, logs: list[str]) -> None:
+        """让已有克隆的 origin 与配置里的 backend_repo_url 保持一致。
+
+        场景：插件与原版同包名，从原版升级过来的实例已有 origin=原作者的 Overstats，
+        用户把 backend_repo_url 改成本版仓库后，直接 pull 仍然拉的是原仓库。
+        此处检测到不一致时自动切换 origin，再执行后续 pull。
+        """
+        try:
+            remote = await git_ops.get_remote_url(self._backend_dir)
+        except Exception:
+            return
+        target = self.repo_url
+        if not remote or not target:
+            return
+        if git_ops._normalize_repo_url(remote) == git_ops._normalize_repo_url(target):
+            return
+        ok, msg = await git_ops.set_remote_url(self._backend_dir, target)
+        if ok:
+            logs.append(f"[3/6] 后端仓库地址已变更，origin 切换：{remote} → {target}")
+            logger.warning(f"[OverstatsDeploy] backend origin 已由 {remote} 切换为 {target}")
+        else:
+            logs.append(f"[3/6] origin 切换失败（继续尝试原仓库）：{msg}")
+
     async def deploy(self) -> DeployResult:
         """执行完整部署流程：git clone/pull → venv → install → config → start → health check。
 
@@ -271,6 +294,7 @@ class DeployManager:
                 # 3. clone 或 pull
                 proxy_config = self._get_proxy_config()
                 if self._backend_dir.exists() and (self._backend_dir / ".git").exists():
+                    await self._align_remote(logs)
                     logs.append("[3/6] 检测到已有后端代码，执行 git pull 更新...")
                     ok, msg = await git_ops.pull(self._backend_dir, proxy_config=proxy_config)
                     if not ok:

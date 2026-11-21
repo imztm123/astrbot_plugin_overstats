@@ -117,9 +117,14 @@ class OverstatsPlugin(Star):
         "全员关": {"show_all_heroes": False},
     }
 
+    # 本版配套的后端仓库地址（与原版同包名，故需主动迁移旧配置）
+    _BACKEND_REPO_TARGET = 'https://github.com/imztm123/Overstats.git'
+    _BACKEND_REPO_UPSTREAM_MARKERS = ('Zzzzzzouhang/Overstats', 'AddOneSecondL/Overstats')
+
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
         self.config = config
+        self._migrate_backend_repo_url()
         self.file_lock = asyncio.Lock()
         self._cmd_limiter = UserConcurrencyLimiter(
             per_user_max=3, timeout_seconds=self._CMD_SLOT_AUTO_RELEASE_SECONDS
@@ -434,6 +439,32 @@ class OverstatsPlugin(Star):
             cur['mode'] = mode
         cfg[gid] = cur
         self._save_full_adapt_config()
+
+    def _migrate_backend_repo_url(self):
+        """把仍指向原版后端的 backend_repo_url 迁到本版配套仓库（只在值等于原版地址时生效）。
+
+        背景：本插件与原版同包名（astrbot_plugin_overstats），同名插件的配置面板会沿用旧值，
+        于是从原版升级过来的实例仍在 clone 原作者的 Overstats 仓库。此处自动纠正并写回配置；
+        用户若手动填了别的地址（含自建 git 服务），不在迁移条件内，不会被覆盖。
+        """
+        try:
+            current = str(self.config.get('backend_repo_url', '') or '').strip()
+        except Exception:
+            return
+        if not current or not any(m in current for m in self._BACKEND_REPO_UPSTREAM_MARKERS):
+            return
+        try:
+            self.config['backend_repo_url'] = self._BACKEND_REPO_TARGET
+            save = getattr(self.config, 'save_config', None)
+            if callable(save):
+                save()
+            logger.warning(
+                f'[Overstats] 检测到 backend_repo_url 仍指向原版后端（{current}），'
+                f'已自动切换为本仓库配套后端 {self._BACKEND_REPO_TARGET}。'
+                f'如需使用原版后端请手动修改该项；切换后请执行 /ow更新后端 或 /ow部署 使现有代码转向新仓库。'
+            )
+        except Exception as e:
+            logger.error(f'[Overstats] 迁移 backend_repo_url 失败: {e}')
 
     def _is_real_at_bot(self, event: AstrMessageEvent) -> bool:
         """检测消息是否真实@了机器人（排除 QQ 官方占位@）。
